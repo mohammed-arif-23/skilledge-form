@@ -68,7 +68,7 @@ export default function PublicFormClient({ form }: { form: any }) {
                         </motion.div>
                         <h2 className="text-2xl font-bold text-[#1a2d7a] mb-3 tracking-tight">Submission Received!</h2>
                         <p className="text-gray-500 text-sm leading-relaxed">
-                            Thank you. Your form has been successfully submitted to AVS Engineering College.
+                            Thank you. Your form has been successfully submitted.
                         </p>
                     </div>
                 </motion.div>
