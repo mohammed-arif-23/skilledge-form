@@ -20,7 +20,7 @@ export async function loginAction(prevState: any, formData: FormData) {
         const count = await Admin.countDocuments();
         if (count === 0) {
             const hash = await bcrypt.hash("admin123", 10);
-            await Admin.create({ email: "admin@formflow.com", passwordHash: hash });
+            await Admin.create({ email: "admin@avsenggcollege.ac.in", passwordHash: hash });
             console.log("Created default admin: admin@formflow.com / admin123");
         }
 
