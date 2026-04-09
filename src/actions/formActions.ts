@@ -63,6 +63,15 @@ export async function getSubmissions(formId: string) {
     };
 }
 
+export async function deleteSubmission(submissionId: string) {
+    await isAuth();
+    await dbConnect();
+
+    if (!mongoose.Types.ObjectId.isValid(submissionId)) throw new Error("Invalid submission id");
+    await Submission.findByIdAndDelete(submissionId);
+    return { success: true };
+}
+
 export async function submitFormBySlug(slug: string, responses: any) {
     await dbConnect();
 

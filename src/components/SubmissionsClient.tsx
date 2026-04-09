@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSubmissions } from '@/actions/formActions';
+import { getSubmissions, deleteSubmission } from '@/actions/formActions';
 import ExcelJS from 'exceljs';
-import { Download, ArrowLeft } from 'lucide-react';
+import { Download, ArrowLeft, Eye, Trash2, X, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SubmissionsClient({ formId }: { formId: string }) {
@@ -11,6 +11,8 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
     const [form, setForm] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [selectedSub, setSelectedSub] = useState<any>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [confirmId, setConfirmId] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
@@ -27,37 +29,38 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
         setLoading(false);
     };
 
+    const handleDelete = async (id: string) => {
+        setDeletingId(id);
+        try {
+            await deleteSubmission(id);
+            setSubmissions((prev) => prev.filter((s) => s._id !== id));
+            if (selectedSub?._id === id) setSelectedSub(null);
+        } catch (e) {
+            console.error(e);
+        }
+        setDeletingId(null);
+        setConfirmId(null);
+    };
+
     const handleExport = async () => {
         if (!form || submissions.length === 0) return;
 
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Submissions');
 
-        // Create columns based on form fields
-        const columns = [
-            { header: 'Submission ID', key: 'id', width: 25 },
-            { header: 'Date', key: 'date', width: 20 },
-            ...(form.fields || []).map((f: any) => ({
-                header: f.label,
-                key: f.id,
-                width: 30
-            }))
+        sheet.columns = [
+            { header: 'Submission ID', key: 'id', width: 28 },
+            { header: 'Date', key: 'date', width: 22 },
+            ...(form.fields || []).map((f: any) => ({ header: f.label, key: f.id, width: 30 }))
         ];
 
-        sheet.columns = columns;
-
-        submissions.forEach(sub => {
-            const row: any = {
-                id: sub._id,
-                date: new Date(sub.createdAt).toLocaleString(),
-            };
-
+        submissions.forEach((sub) => {
+            const row: any = { id: sub._id, date: new Date(sub.createdAt).toLocaleString() };
             form.fields.forEach((f: any) => {
                 let val = sub.responses[f.id] || '';
                 if (Array.isArray(val)) val = val.join(', ');
                 row[f.id] = val;
             });
-
             sheet.addRow(row);
         });
 
@@ -70,57 +73,109 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
         a.click();
     };
 
-    if (loading) return <div>Loading...</div>;
-    if (!form) return <div>Form not found</div>;
+    if (loading) return (
+        <div className="animate-pulse space-y-4">
+            <div className="h-10 bg-gray-200 rounded-lg w-1/3" />
+            {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-100 rounded-lg" />)}
+        </div>
+    );
+    if (!form) return <div className="text-red-500">Form not found.</div>;
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
                     <Link href="/admin/dashboard" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">{form.title}</h1>
-                        <p className="text-gray-500">Submissions ({submissions.length})</p>
+                        <p className="text-sm text-gray-500">{submissions.length} submission{submissions.length !== 1 ? 's' : ''}</p>
                     </div>
                 </div>
                 <button
                     onClick={handleExport}
                     disabled={submissions.length === 0}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-sm"
                 >
-                    <Download className="w-5 h-5" />
+                    <Download className="w-4 h-4" />
                     Export to Excel
                 </button>
             </div>
 
-            <div className="flex gap-6">
+            <div className="flex gap-6 items-start">
+                {/* Table */}
                 <div className="flex-1 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm text-gray-600">
                             <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
                                 <tr>
-                                    <th className="px-6 py-3 font-semibold">Date</th>
+                                    <th className="px-5 py-3.5 font-semibold">#</th>
+                                    <th className="px-5 py-3.5 font-semibold">Date</th>
                                     {form.fields.slice(0, 3).map((f: any) => (
-                                        <th key={f.id} className="px-6 py-3 font-semibold truncate max-w-[150px]">{f.label}</th>
+                                        <th key={f.id} className="px-5 py-3.5 font-semibold truncate max-w-[140px]">{f.label}</th>
                                     ))}
-                                    <th className="px-6 py-3 font-semibold text-right">Action</th>
+                                    <th className="px-5 py-3.5 font-semibold text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {submissions.length === 0 ? (
-                                    <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No submissions yet</td></tr>
-                                ) : submissions.map(sub => (
-                                    <tr key={sub._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap">{new Date(sub.createdAt).toLocaleDateString()}</td>
+                                    <tr>
+                                        <td colSpan={6} className="px-5 py-12 text-center text-gray-400">
+                                            No submissions yet for this form.
+                                        </td>
+                                    </tr>
+                                ) : submissions.map((sub, idx) => (
+                                    <tr key={sub._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-5 py-4 text-gray-400 text-xs">{idx + 1}</td>
+                                        <td className="px-5 py-4 whitespace-nowrap text-gray-600">
+                                            {new Date(sub.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                        </td>
                                         {form.fields.slice(0, 3).map((f: any) => {
-                                            let val = sub.responses[f.id] || '-';
+                                            let val = sub.responses[f.id] || '—';
                                             if (Array.isArray(val)) val = val.join(', ');
-                                            return <td key={f.id} className="px-6 py-4 truncate max-w-[150px]">{val}</td>
+                                            return (
+                                                <td key={f.id} className="px-5 py-4 text-gray-700">
+                                                    <span className="block truncate max-w-[120px]" title={val}>{val}</span>
+                                                </td>
+                                            );
                                         })}
-                                        <td className="px-6 py-4 text-right">
-                                            <button onClick={() => setSelectedSub(sub)} className="text-blue-600 hover:underline font-medium">View Detail</button>
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-2 justify-end">
+                                                <button
+                                                    onClick={() => setSelectedSub(sub)}
+                                                    className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                                    title="View Details"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                                {confirmId === sub._id ? (
+                                                    <div className="flex items-center gap-1">
+                                                        <button
+                                                            onClick={() => handleDelete(sub._id)}
+                                                            disabled={deletingId === sub._id}
+                                                            className="px-2 py-1 bg-red-600 text-white text-xs font-semibold rounded hover:bg-red-700 transition-colors disabled:opacity-60"
+                                                        >
+                                                            {deletingId === sub._id ? '...' : 'Confirm'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setConfirmId(null)}
+                                                            className="p-1 text-gray-400 hover:text-gray-600"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setConfirmId(sub._id)}
+                                                        className="p-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                                                        title="Delete Submission"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -129,26 +184,51 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
                     </div>
                 </div>
 
+                {/* Detail Panel */}
                 {selectedSub && (
-                    <div className="w-96 bg-white border border-gray-200 rounded-xl p-6 shadow-sm self-start sticky top-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-lg text-gray-900">Submission Details</h3>
-                            <button onClick={() => setSelectedSub(null)} className="text-gray-400 hover:text-gray-600">&times;</button>
+                    <div className="w-96 bg-white border border-gray-200 rounded-xl shadow-sm self-start sticky top-6">
+                        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+                            <h3 className="font-bold text-gray-900">Submission Detail</h3>
+                            <button onClick={() => setSelectedSub(null)} className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
-                        <div className="space-y-4">
-                            <div className="text-sm text-gray-500 mb-4">
-                                Submitted on: {new Date(selectedSub.createdAt).toLocaleString()}
-                            </div>
+                        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            <p className="text-xs text-gray-400 mb-2">
+                                Submitted on: {new Date(selectedSub.createdAt).toLocaleString('en-IN')}
+                            </p>
                             {form.fields.map((f: any) => (
                                 <div key={f.id} className="border-b border-gray-100 pb-3 last:border-0">
-                                    <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{f.label}</span>
-                                    <div className="text-gray-800 break-words">
+                                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{f.label}</span>
+                                    <div className="text-sm text-gray-800 break-words">
                                         {Array.isArray(selectedSub.responses[f.id])
                                             ? selectedSub.responses[f.id].join(', ')
-                                            : (selectedSub.responses[f.id] || '-')}
+                                            : (selectedSub.responses[f.id] || <span className="text-gray-400 italic">No answer</span>)}
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                        {/* Delete from panel */}
+                        <div className="px-6 py-4 border-t border-gray-100">
+                            {confirmId === selectedSub._id ? (
+                                <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                                    <span className="text-xs text-red-600 flex-1">Delete this submission?</span>
+                                    <button onClick={() => handleDelete(selectedSub._id)} disabled={deletingId === selectedSub._id}
+                                        className="text-xs font-bold text-red-600 hover:underline disabled:opacity-60">
+                                        {deletingId === selectedSub._id ? '...' : 'Yes, delete'}
+                                    </button>
+                                    <button onClick={() => setConfirmId(null)} className="text-xs text-gray-400 hover:text-gray-600">Cancel</button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setConfirmId(selectedSub._id)}
+                                    className="w-full flex items-center justify-center gap-2 py-2 text-sm text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    Delete this submission
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}
