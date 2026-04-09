@@ -27,7 +27,6 @@ export default function LoginPage() {
                     <Image src="/logo.png" alt="Logo" width={180} height={50} className="mx-auto mb-6 object-contain" priority />
                     <h1 className="text-2xl font-bold text-gray-900">Sign In</h1>
                     <p className="text-gray-500 mt-2">Manage your forms</p>
-                    <p className="text-xs text-blue-500 mt-1">If no admin exists, login with admin@formflow.com / admin123 to create one.</p>
                 </div>
 
                 <form action={action} className="space-y-6">
