@@ -104,7 +104,57 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
                 </button>
             </div>
 
-            <div className="flex gap-6 items-start">
+            {/* Mobile modal overlay for detail panel */}
+            {selectedSub && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center lg:hidden bg-black/40 backdrop-blur-sm" onClick={() => setSelectedSub(null)}>
+                    <div className="w-full sm:w-auto sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+                            <h3 className="font-bold text-gray-900">Submission Detail</h3>
+                            <button onClick={() => setSelectedSub(null)} className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4 overflow-y-auto flex-1">
+                            <p className="text-xs text-gray-400 mb-2">
+                                Submitted on: {new Date(selectedSub.createdAt).toLocaleString('en-IN')}
+                            </p>
+                            {form.fields.map((f: any) => (
+                                <div key={f.id} className="border-b border-gray-100 pb-3 last:border-0">
+                                    <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{f.label}</span>
+                                    <div className="text-sm text-gray-800 break-words">
+                                        {Array.isArray(selectedSub.responses[f.id])
+                                            ? selectedSub.responses[f.id].join(', ')
+                                            : (selectedSub.responses[f.id] || <span className="text-gray-400 italic">No answer</span>)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="px-6 py-4 border-t border-gray-100">
+                            {confirmId === selectedSub._id ? (
+                                <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                                    <span className="text-xs text-red-600 flex-1">Delete this submission?</span>
+                                    <button onClick={() => handleDelete(selectedSub._id)} disabled={deletingId === selectedSub._id}
+                                        className="text-xs font-bold text-red-600 hover:underline disabled:opacity-60">
+                                        {deletingId === selectedSub._id ? '...' : 'Yes, delete'}
+                                    </button>
+                                    <button onClick={() => setConfirmId(null)} className="text-xs text-gray-400 hover:text-gray-600">Cancel</button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setConfirmId(selectedSub._id)}
+                                    className="w-full flex items-center justify-center gap-2 py-2 text-sm text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    Delete this submission
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
                 {/* Table */}
                 <div className="flex-1 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
@@ -184,9 +234,9 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
                     </div>
                 </div>
 
-                {/* Detail Panel */}
+                {/* Detail Panel — desktop only sidebar */}
                 {selectedSub && (
-                    <div className="w-96 bg-white border border-gray-200 rounded-xl shadow-sm self-start sticky top-6">
+                    <div className="hidden lg:block w-96 bg-white border border-gray-200 rounded-xl shadow-sm self-start sticky top-6">
                         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
                             <h3 className="font-bold text-gray-900">Submission Detail</h3>
                             <button onClick={() => setSelectedSub(null)} className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition-colors">

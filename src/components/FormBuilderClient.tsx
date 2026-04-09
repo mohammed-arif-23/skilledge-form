@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { saveForm, getForm } from '@/actions/formActions';
 import { useRouter } from 'next/navigation';
 import { GripVertical, Plus, Trash2, Save } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid'; // I need to install uuid or just use crypto.randomUUID
+
 
 export default function FormBuilderClient({ formId }: { formId?: string }) {
     const router = useRouter();
@@ -82,7 +82,7 @@ export default function FormBuilderClient({ formId }: { formId?: string }) {
     if (loading) return <div>Loading...</div>;
 
     return (
-        <div className="max-w-5xl mx-auto flex gap-6">
+        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-6">
             {/* Builder Core */}
             <div className="flex-1 space-y-6">
                 <div className="bg-white p-6 rounded-xl border border-gray-200">
@@ -107,17 +107,17 @@ export default function FormBuilderClient({ formId }: { formId?: string }) {
                         <div key={field.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex gap-4 group">
                             <div className="cursor-move text-gray-300 group-hover:text-gray-500 pt-2"><GripVertical /></div>
                             <div className="flex-1 space-y-4">
-                                <div className="flex items-center gap-4">
+                                <div className="flex flex-wrap items-center gap-3">
                                     <input
                                         type="text"
                                         value={field.label}
                                         onChange={e => updateField(field.id, { label: e.target.value })}
-                                        className="flex-1 font-medium bg-gray-50 border border-transparent focus:border-blue-500 focus:bg-white rounded px-3 py-1"
+                                        className="flex-1 min-w-0 font-medium bg-gray-50 border border-transparent focus:border-blue-500 focus:bg-white rounded px-3 py-1"
                                     />
                                     <select
                                         value={field.type}
                                         onChange={e => updateField(field.id, { type: e.target.value })}
-                                        className="border-gray-200 rounded text-sm"
+                                        className="border-gray-200 rounded text-sm shrink-0"
                                     >
                                         <option value="text">Short Text</option>
                                         <option value="textarea">Long Text</option>
@@ -189,7 +189,7 @@ export default function FormBuilderClient({ formId }: { formId?: string }) {
             </div>
 
             {/* Sidebar Controls */}
-            <div className="w-72 space-y-6">
+            <div className="lg:w-72 w-full space-y-6">
                 <div className="bg-white p-5 rounded-xl border border-gray-200">
                     <h3 className="font-semibold text-gray-800 mb-4">Form Settings</h3>
                     <div className="space-y-4">
