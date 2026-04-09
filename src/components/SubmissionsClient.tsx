@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react';
 import { getSubmissions, deleteSubmission } from '@/actions/formActions';
 import ExcelJS from 'exceljs';
-import { Download, ArrowLeft, Eye, Trash2, X, AlertTriangle } from 'lucide-react';
+import { Download, ArrowLeft, Eye, Trash2, X, AlertTriangle, Search } from 'lucide-react';
 import Link from 'next/link';
+import Pagination from '@/components/Pagination';
+
+const PAGE_SIZE = 10;
 
 export default function SubmissionsClient({ formId }: { formId: string }) {
     const [submissions, setSubmissions] = useState<any[]>([]);
@@ -13,6 +16,8 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
     const [selectedSub, setSelectedSub] = useState<any>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [confirmId, setConfirmId] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [query, setQuery] = useState('');
 
     useEffect(() => {
         loadData();
@@ -33,13 +38,25 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
         setDeletingId(id);
         try {
             await deleteSubmission(id);
-            setSubmissions((prev) => prev.filter((s) => s._id !== id));
+            setSubmissions((prev) => {
+                const updated = prev.filter((s) => s._id !== id);
+                // If deleting makes current page empty, go back one
+                const newTotalPages = Math.ceil(updated.length / PAGE_SIZE);
+                if (page > newTotalPages) setPage(Math.max(1, newTotalPages));
+                return updated;
+            });
             if (selectedSub?._id === id) setSelectedSub(null);
         } catch (e) {
             console.error(e);
         }
         setDeletingId(null);
         setConfirmId(null);
+    };
+
+    const handleSearch = (val: string) => {
+        setQuery(val);
+        setPage(1);
+        setSelectedSub(null);
     };
 
     const handleExport = async () => {
@@ -81,6 +98,23 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
     );
     if (!form) return <div className="text-red-500">Form not found.</div>;
 
+    // Filter submissions across all response values + date string
+    const filtered = (() => {
+        const q = query.trim().toLowerCase();
+        if (!q) return submissions;
+        return submissions.filter(sub => {
+            const dateStr = new Date(sub.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).toLowerCase();
+            if (dateStr.includes(q)) return true;
+            return Object.values(sub.responses || {}).some((v: any) => {
+                const str = Array.isArray(v) ? v.join(', ') : String(v ?? '');
+                return str.toLowerCase().includes(q);
+            });
+        });
+    })();
+
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    const paginatedSubs = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -91,7 +125,11 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
                     </Link>
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">{form.title}</h1>
-                        <p className="text-sm text-gray-500">{submissions.length} submission{submissions.length !== 1 ? 's' : ''}</p>
+                        <p className="text-sm text-gray-500">
+                            {query
+                                ? `${filtered.length} of ${submissions.length} submission${submissions.length !== 1 ? 's' : ''}`
+                                : `${submissions.length} submission${submissions.length !== 1 ? 's' : ''}`}
+                        </p>
                     </div>
                 </div>
                 <button
@@ -103,6 +141,29 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
                     Export to Excel
                 </button>
             </div>
+
+            {/* Search bar */}
+            {submissions.length > 0 && (
+                <div className="relative">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={e => handleSearch(e.target.value)}
+                        placeholder="Search by response value or date…"
+                        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow placeholder-gray-400"
+                    />
+                    {query && (
+                        <button
+                            onClick={() => handleSearch('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            aria-label="Clear search"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Mobile modal overlay for detail panel */}
             {selectedSub && (
@@ -170,15 +231,23 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {submissions.length === 0 ? (
+                                {filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-5 py-12 text-center text-gray-400">
-                                            No submissions yet for this form.
+                                        <td colSpan={6} className="px-5 py-12 text-center">
+                                            {query ? (
+                                                <div>
+                                                    <Search className="mx-auto w-7 h-7 text-gray-300 mb-2" />
+                                                    <p className="text-gray-400 font-medium">No results for &ldquo;{query}&rdquo;</p>
+                                                    <button onClick={() => handleSearch('')} className="mt-1 text-sm text-blue-600 hover:underline">Clear search</button>
+                                                </div>
+                                            ) : (
+                                                <p className="text-gray-400">No submissions yet for this form.</p>
+                                            )}
                                         </td>
                                     </tr>
-                                ) : submissions.map((sub, idx) => (
+                                ) : paginatedSubs.map((sub, idx) => (
                                     <tr key={sub._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-5 py-4 text-gray-400 text-xs">{idx + 1}</td>
+                                        <td className="px-5 py-4 text-gray-400 text-xs">{(page - 1) * PAGE_SIZE + idx + 1}</td>
                                         <td className="px-5 py-4 whitespace-nowrap text-gray-600">
                                             {new Date(sub.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                         </td>
@@ -283,6 +352,18 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
                     </div>
                 )}
             </div>
+
+            {/* Pagination */}
+            <Pagination
+                page={page}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={(p) => {
+                    setPage(p);
+                    setSelectedSub(null);
+                }}
+            />
         </div>
     );
 }
