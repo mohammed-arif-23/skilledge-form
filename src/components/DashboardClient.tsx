@@ -60,22 +60,22 @@ export default function DashboardClient() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-wrap gap-3 justify-between items-center">
+            <div className="flex flex-wrap gap-3 justify-between items-center mb-2">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Your Forms</h1>
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1a2d7a] tracking-tight">Your Forms</h1>
                     {!loading && forms.length > 0 && (
-                        <p className="text-sm text-gray-500 mt-0.5">
+                        <p className="text-sm font-medium text-[#93AAEF] mt-1">
                             {filtered.length !== forms.length
                                 ? `${filtered.length} of ${forms.length} forms`
-                                : `${forms.length} form${forms.length !== 1 ? 's' : ''} total`}
+                                : `${forms.length} total form${forms.length !== 1 ? 's' : ''}`}
                         </p>
                     )}
                 </div>
                 <Link
                     href="/admin/forms/create"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium whitespace-nowrap"
+                    className="bg-[#2B4ECC] hover:bg-[#1E3A9F] text-white px-5 py-3 rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_14px_rgba(43,78,204,0.3)] hover:shadow-[0_6px_20px_rgba(43,78,204,0.4)] text-[15px] font-bold whitespace-nowrap active:scale-[0.98]"
                 >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-5 h-5" strokeWidth={2.5} />
                     Create Form
                 </Link>
             </div>
@@ -89,7 +89,7 @@ export default function DashboardClient() {
                         value={query}
                         onChange={e => handleSearch(e.target.value)}
                         placeholder="Search by title, slug or description…"
-                        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow placeholder-gray-400"
+                        className="w-full pl-11 pr-11 py-3.5 text-[15px] font-medium bg-white border-2 border-gray-100 rounded-2xl shadow-[0_2px_10px_rgba(30,58,159,0.04)] focus:outline-none focus:border-[#2B4ECC] transition-all placeholder-gray-400 text-[#1a2d7a]"
                     />
                     {query && (
                         <button
@@ -124,36 +124,36 @@ export default function DashboardClient() {
                 <>
                     <div className="grid gap-4">
                         {paginatedForms.map(form => (
-                            <div key={form._id} className="bg-white p-4 sm:p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 hover:shadow-md transition-shadow">
+                            <div key={form._id} className="bg-white p-5 sm:p-7 rounded-2xl border-2 border-gray-100/60 shadow-[0_4px_16px_rgba(30,58,159,0.04)] flex flex-col sm:flex-row sm:items-center gap-5 hover:border-[#2B4ECC]/20 hover:shadow-[0_8px_24px_rgba(30,58,159,0.08)] transition-all">
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                                        <h3 className="font-semibold text-base sm:text-lg text-gray-900 truncate">{form.title}</h3>
-                                        <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold ${form.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    <div className="flex flex-wrap items-center gap-3 mb-1.5">
+                                        <h3 className="font-extrabold text-lg sm:text-xl text-[#1a2d7a] truncate">{form.title}</h3>
+                                        <span className={`shrink-0 px-2.5 py-1 rounded-md text-[11px] font-black tracking-wide ${form.status === 'published' ? 'bg-[#EEF2FF] text-[#2B4ECC]' : 'bg-gray-100 text-gray-600'}`}>
                                             {form.status.toUpperCase()}
                                         </span>
                                     </div>
-                                    <p className="text-sm text-gray-500 line-clamp-1">{form.description}</p>
-                                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                                        <span className="bg-gray-50 border border-gray-100 px-2 py-0.5 rounded font-mono">/form/{form.slug}</span>
+                                    <p className="text-[15px] font-medium text-gray-500 line-clamp-1">{form.description}</p>
+                                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-[#93AAEF]">
+                                        <span className="bg-[#F4F6FD] border border-[#2B4ECC]/10 text-[#2B4ECC] px-2.5 py-1 rounded-md font-mono">/form/{form.slug}</span>
                                         <span>{form.fields?.length || 0} fields</span>
                                     </div>
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex items-center gap-2 shrink-0">
+                                <div className="flex items-center gap-2.5 shrink-0">
                                     {form.status === 'published' && (
-                                        <a href={`/form/${form.slug}`} target="_blank" rel="noreferrer" className="p-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg" title="View Public Form">
+                                        <a href={`/form/${form.slug}`} target="_blank" rel="noreferrer" className="p-3 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors" title="View Public Form">
                                             <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
                                         </a>
                                     )}
-                                    <Link href={`/admin/forms/${form._id}/submissions`} className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg" title="View Submissions">
+                                    <Link href={`/admin/forms/${form._id}/submissions`} className="p-3 bg-[#EEF2FF] text-[#2B4ECC] hover:bg-[#2B4ECC] hover:text-white rounded-xl transition-colors" title="View Submissions">
                                         <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </Link>
-                                    <Link href={`/admin/forms/${form._id}/edit`} className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg" title="Edit Form">
+                                    <Link href={`/admin/forms/${form._id}/edit`} className="p-3 bg-[#E8920A]/10 text-[#E8920A] hover:bg-[#E8920A] hover:text-white rounded-xl transition-colors" title="Edit Form">
                                         <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </Link>
-                                    <button onClick={(e) => handleDelete(form._id, e)} className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg" title="Delete Form">
+                                    <button onClick={(e) => handleDelete(form._id, e)} className="p-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-colors" title="Delete Form">
                                         <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
                                 </div>

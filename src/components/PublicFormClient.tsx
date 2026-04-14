@@ -51,24 +51,24 @@ export default function PublicFormClient({ form }: { form: any }) {
         return (
             <div className="min-h-screen bg-[#F4F6FD] flex flex-col items-center justify-center p-6">
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 0.6, ease: 'easeOut' }}
-                    className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden text-center"
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl shadow-[#1E3A9F]/5 overflow-hidden text-center border border-gray-100"
                 >
                     <div className="h-2 w-full bg-[#E8920A]" />
                     <div className="p-12">
                         <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
-                            className="w-20 h-20 rounded-full bg-[#EEF2FF] border-4 border-[#2B4ECC] flex items-center justify-center mx-auto mb-8"
+                            transition={{ delay: 0.2, type: 'spring', stiffness: 250, damping: 15 }}
+                            className="w-20 h-20 rounded-full bg-[#EEF2FF] border-4 border-[#2B4ECC] flex items-center justify-center mx-auto mb-8 shadow-inner"
                         >
-                            <Check className="w-9 h-9 text-[#2B4ECC]" strokeWidth={3} />
+                            <Check className="w-10 h-10 text-[#2B4ECC]" strokeWidth={3} />
                         </motion.div>
-                        <h2 className="text-2xl font-bold text-[#1a2d7a] mb-3 tracking-tight">Submission Received!</h2>
-                        <p className="text-gray-500 text-sm leading-relaxed">
-                            Thank you. Your form has been successfully submitted.
+                        <h2 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Submission Received!</h2>
+                        <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto font-medium">
+                            Thank you. Your details have been securely recorded by the system.
                         </p>
                     </div>
                 </motion.div>
@@ -78,61 +78,71 @@ export default function PublicFormClient({ form }: { form: any }) {
 
     const container = {
         hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { staggerChildren: 0.07 } }
+        show: { opacity: 1, transition: { staggerChildren: 0.05 } }
     };
     const item = {
-        hidden: { opacity: 0, y: 16 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } }
+        hidden: { opacity: 0, y: 12 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } }
     };
 
     const inputBase = (id: string) =>
-        `w-full outline-none text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 rounded-xl px-4 py-3.5 border-2 ${focused === id
-            ? 'border-[#2B4ECC] bg-white shadow-[0_0_0_4px_rgba(43,78,204,0.08)]'
-            : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+        `w-full outline-none text-[15px] font-medium text-gray-900 placeholder:text-gray-400 placeholder:font-normal transition-all duration-200 rounded-xl px-5 py-4 border-2 ${focused === id
+            ? 'border-[#2B4ECC] bg-white ring-4 ring-[#2B4ECC]/10'
+            : 'border-gray-200 bg-gray-50/50 hover:bg-gray-100/50 hover:border-gray-300'
         }`;
 
     return (
-        <div className="min-h-screen bg-[#F4F6FD] font-sans pb-24">
+        <div className="min-h-screen bg-[#F4F6FD] font-sans pb-24 selection:bg-[#E8920A]/20 selection:text-[#1E3A9F]">
             {/* Top accent bar */}
             <div className="h-1.5 w-full bg-[#E8920A]" />
 
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 shadow-sm">
-                <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-center">
-                    <div className="relative w-[320px] h-[70px]">
-                        <Image src="/logo.png" alt="AVS Engineering College" fill className="object-contain" priority />
+            {/* Clean White Header for Logo */}
+            <div className="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
+                <div className="max-w-4xl mx-auto px-2 py-2 flex items-center justify-center sm:justify-start">
+                    <div className="relative w-full max-w-[360px] sm:max-w-[420px] h-[75px] sm:h-[60px]">
+                        <Image src="/logo.png" alt="AVS Engineering College" fill className="object-contain object-center sm:object-left" priority />
                     </div>
                 </div>
             </div>
 
-            {/* Form hero banner */}
-            <div className="bg-[#1E3A9F] text-white">
-                <div className="max-w-3xl mx-auto px-6 py-10">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="h-6 w-1.5 bg-[#E8920A] rounded-full" />
-                        <span className="text-[#93AAEF] text-xs font-semibold uppercase tracking-widest">Elite Students Programme</span>
+            {/* Refined Blue Hero Banner */}
+            <div className="relative overflow-hidden bg-[#1E3A9F] pb-24 pt-12 text-center sm:text-left">
+                {/* Subtle embedded background designs - NOT overlapping actual content colors */}
+                <div className="absolute right-0 top-0 w-96 h-96 bg-white opacity-[0.03] rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+                <div className="absolute left-0 bottom-0 w-80 h-80 bg-[#E8920A] opacity-10 rounded-full blur-3xl -translate-x-1/2 translate-y-1/3 pointer-events-none" />
+
+                <div className="relative z-10 max-w-3xl mx-auto px-6">
+                    <div className="flex items-center justify-center sm:justify-start gap-3 mb-4">
+                        <span className="flex items-center tracking-widest text-[#E8920A] text-xs font-bold uppercase">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#E8920A] mr-2"></div>
+                            Elite Programme
+                        </span>
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
                         {form.title}
                     </h1>
                     {form.description && (
-                        <p className="mt-3 text-[#93AAEF] text-base leading-relaxed max-w-xl">
+                        <p className="mt-4 text-[#93AAEF] font-medium text-base sm:text-lg leading-relaxed max-w-2xl mx-auto sm:mx-0">
                             {form.description}
                         </p>
                     )}
-                    <div className="mt-5 flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-[#2B4ECC]/40 rounded-full px-3 py-1">
-                            <div className="w-2 h-2 rounded-full bg-[#E8920A] animate-pulse" />
-                            <span className="text-xs text-[#c5d0f8] font-medium">{form.fields?.length || 0} questions</span>
-                        </div>
-                        <span className="text-xs text-[#7b94dd]">All starred fields are mandatory</span>
-                    </div>
                 </div>
             </div>
 
-            {/* Form body */}
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-4">
-                <motion.div initial="hidden" animate="show" variants={container}>
+            {/* Main Form Body Container */}
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-14 relative z-20">
+                <motion.div initial="hidden" animate="show" variants={container} className="bg-white rounded-3xl shadow-xl shadow-[#1E3A9F]/5 border border-gray-100 p-6 sm:p-10 lg:p-12">
+
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-6 mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-6 bg-[#2B4ECC] rounded-full" />
+                            <h3 className="text-xl font-bold text-gray-900 tracking-tight">Registration Details</h3>
+                        </div>
+                        <div className="flex items-center gap-2 bg-gray-50 rounded-full px-4 py-1.5 border border-gray-100">
+                            <span className="text-sm font-bold text-[#2B4ECC]">{form.fields?.length || 0}</span>
+                            <span className="text-xs font-semibold text-gray-500 uppercase">Questions</span>
+                        </div>
+                    </div>
 
                     {/* Error */}
                     <AnimatePresence>
@@ -141,26 +151,22 @@ export default function PublicFormClient({ form }: { form: any }) {
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="overflow-hidden"
+                                className="overflow-hidden mb-6"
                             >
-                                <div className="bg-red-50 text-red-700 px-4 py-3 rounded-xl text-sm font-medium border border-red-200 flex items-center gap-2.5 mb-4">
-                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                <div className="bg-red-50 text-red-700 px-4 py-3.5 rounded-xl text-sm font-semibold border border-red-200 flex items-center gap-3">
+                                    <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
                                     {error}
                                 </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-8">
                         {form.fields.map((field: any) => (
-                            <motion.div
-                                key={field.id}
-                                variants={item}
-                                className="bg-white rounded-2xl border border-gray-200/80 p-7 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(30,58,159,0.08)] transition-shadow duration-300"
-                            >
-                                <label className="block text-[15px] font-bold text-gray-800 mb-4 leading-snug">
+                            <motion.div key={field.id} variants={item} className="group">
+                                <label className="block text-[15px] font-bold text-gray-800 tracking-wide mb-3 px-1">
                                     {field.label}
-                                    {field.required && <span className="text-[#E8920A] ml-1.5 text-base font-black">*</span>}
+                                    {field.required && <span className="text-[#E8920A] ml-1 text-lg leading-none">*</span>}
                                 </label>
 
                                 {/* Text / Email / Date */}
@@ -168,7 +174,7 @@ export default function PublicFormClient({ form }: { form: any }) {
                                     <input
                                         type={field.type}
                                         required={field.required}
-                                        placeholder={field.placeholder || 'Type here...'}
+                                        placeholder={field.placeholder || 'Type your answer...'}
                                         value={responses[field.id] || ''}
                                         onChange={(e) => handleChange(field.id, e.target.value)}
                                         onFocus={() => setFocused(field.id)}
@@ -181,12 +187,12 @@ export default function PublicFormClient({ form }: { form: any }) {
                                 {field.type === 'textarea' && (
                                     <textarea
                                         required={field.required}
-                                        placeholder={field.placeholder || 'Type here...'}
+                                        placeholder={field.placeholder || 'Provide detailed information...'}
                                         value={responses[field.id] || ''}
                                         onChange={(e) => handleChange(field.id, e.target.value)}
                                         onFocus={() => setFocused(field.id)}
                                         onBlur={() => setFocused(null)}
-                                        rows={3}
+                                        rows={4}
                                         className={`${inputBase(field.id)} resize-y`}
                                     />
                                 )}
@@ -200,38 +206,40 @@ export default function PublicFormClient({ form }: { form: any }) {
                                             onChange={(e) => handleChange(field.id, e.target.value)}
                                             onFocus={() => setFocused(field.id)}
                                             onBlur={() => setFocused(null)}
-                                            className={`${inputBase(field.id)} appearance-none cursor-pointer`}
+                                            className={`${inputBase(field.id)} appearance-none cursor-pointer pr-12`}
                                         >
-                                            <option value="" disabled hidden>Select option...</option>
+                                            <option value="" disabled hidden>Select an option...</option>
                                             {(field.options || []).map((opt: string) => (
-                                                <option key={opt} value={opt}>{opt}</option>
+                                                <option key={opt} value={opt} className="font-medium">{opt}</option>
                                             ))}
                                         </select>
-                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-gray-100/50 flex items-center justify-center pointer-events-none group-hover:bg-gray-200/50 transition-colors">
+                                            <ChevronDown className="w-5 h-5 text-gray-500" />
+                                        </div>
                                     </div>
                                 )}
 
                                 {/* Radio */}
                                 {field.type === 'radio' && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {(field.options || []).map((opt: string) => {
                                             const isSelected = responses[field.id] === opt;
                                             return (
                                                 <label
                                                     key={opt}
                                                     className={`flex items-center gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${isSelected
-                                                        ? 'border-[#2B4ECC] bg-[#EEF2FF] shadow-[0_0_0_4px_rgba(43,78,204,0.07)]'
-                                                        : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
+                                                        ? 'border-[#2B4ECC] bg-[#EEF2FF]'
+                                                        : 'border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     <input type="radio" name={field.id} value={opt} checked={isSelected}
                                                         onChange={(e) => handleChange(field.id, e.target.value)}
-                                                        required={field.required} className="sr-only peer"
+                                                        required={field.required} className="sr-only"
                                                     />
-                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${isSelected ? 'border-[#2B4ECC]' : 'border-gray-300 bg-white'}`}>
-                                                        {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-[#2B4ECC]" />}
+                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[#2B4ECC]' : 'border-gray-300 bg-white'}`}>
+                                                        <div className={`w-2.5 h-2.5 rounded-full bg-[#2B4ECC] transition-all duration-200 ${isSelected ? 'scale-100' : 'scale-0'}`} />
                                                     </div>
-                                                    <span className={`text-sm font-semibold transition-colors ${isSelected ? 'text-[#1E3A9F]' : 'text-gray-700'}`}>{opt}</span>
+                                                    <span className={`text-[15px] font-semibold transition-colors ${isSelected ? 'text-[#1E3A9F]' : 'text-gray-700'}`}>{opt}</span>
                                                 </label>
                                             );
                                         })}
@@ -240,25 +248,25 @@ export default function PublicFormClient({ form }: { form: any }) {
 
                                 {/* Checkbox */}
                                 {field.type === 'checkbox' && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {(field.options || []).map((opt: string) => {
                                             const isChecked = (responses[field.id] || []).includes(opt);
                                             return (
                                                 <label
                                                     key={opt}
                                                     className={`flex items-center gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${isChecked
-                                                        ? 'border-[#2B4ECC] bg-[#EEF2FF]'
-                                                        : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
+                                                        ? 'border-[#E8920A] bg-[#EEF2FF]'
+                                                        : 'border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     <input type="checkbox" checked={isChecked}
                                                         onChange={(e) => handleCheckbox(field.id, opt, e.target.checked)}
                                                         className="sr-only"
                                                     />
-                                                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${isChecked ? 'bg-[#2B4ECC] border-[#2B4ECC]' : 'border-gray-300 bg-white'}`}>
-                                                        {isChecked && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3.5} />}
+                                                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${isChecked ? 'bg-[#E8920A] border-[#E8920A]' : 'border-gray-300 bg-white'}`}>
+                                                        <Check className={`w-3.5 h-3.5 text-white transition-transform duration-200 ${isChecked ? 'scale-100' : 'scale-0'}`} strokeWidth={4} />
                                                     </div>
-                                                    <span className={`text-sm font-semibold transition-colors ${isChecked ? 'text-[#1E3A9F]' : 'text-gray-700'}`}>{opt}</span>
+                                                    <span className={`text-[15px] font-semibold transition-colors ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>{opt}</span>
                                                 </label>
                                             );
                                         })}
@@ -267,21 +275,21 @@ export default function PublicFormClient({ form }: { form: any }) {
                             </motion.div>
                         ))}
 
-                        {/* Submit */}
-                        <motion.div variants={item} className="pt-2 pb-8">
+                        {/* Submit Field */}
+                        <motion.div variants={item} className="pt-6">
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full flex items-center justify-center gap-3 bg-[#1E3A9F] hover:bg-[#162d85] active:scale-[0.99] text-white font-bold text-base py-5 rounded-2xl transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_8px_24px_rgba(30,58,159,0.3)] hover:shadow-[0_12px_30px_rgba(30,58,159,0.4)]"
+                                className="w-full flex items-center justify-center gap-3 bg-[#1E3A9F] hover:bg-[#162d85] active:scale-[0.99] text-white font-bold text-[16px] py-4 rounded-xl transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-[#1E3A9F]/20"
                             >
                                 {isSubmitting ? (
                                     <><Loader2 className="w-5 h-5 animate-spin" /><span>Submitting...</span></>
                                 ) : (
-                                    <><span>Submit Registration</span><ArrowRight className="w-5 h-5" /></>
+                                    <><span>Submit Form</span><ArrowRight className="w-5 h-5" /></>
                                 )}
                             </button>
-                            <p className="text-center text-xs text-gray-400 mt-4">
-                                By submitting, you confirm all details are accurate • AVSEC SkillEdge © 2026
+                            <p className="text-center text-xs text-gray-400 mt-5 font-medium tracking-wide">
+                                AVSEC SkillEdge © 2026. All rights reserved.
                             </p>
                         </motion.div>
                     </form>
