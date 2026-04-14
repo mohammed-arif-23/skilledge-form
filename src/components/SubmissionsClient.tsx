@@ -9,6 +9,34 @@ import Pagination from '@/components/Pagination';
 
 const PAGE_SIZE = 10;
 
+const normalizeYear = (val: string | null | undefined): string | null => {
+    if (!val) return null;
+    const str = String(val).toLowerCase().trim();
+
+    const gradMatch = str.match(/\b(2022|2023|2024|2025|2026|2027|2028)\b/);
+    if (gradMatch) {
+        const yr = gradMatch[1];
+        if (yr === '2025') return 'Year 1';
+        if (yr === '2024') return 'Year 2';
+        if (yr === '2023') return 'Year 3';
+        if (yr === '2022') return 'Year 4';
+        return `Year ${yr}`;
+    }
+
+    const s = str.replace(/\s+/g, '');
+    if (/4(th)?|iv|fourth|\|\|\|\|/i.test(s)) return 'Year 4';
+    if (/3(rd|d)?|iii|third|\|\|\|/i.test(s)) return 'Year 3';
+    if (/2(nd)?|ii|second|ll|\|\|/i.test(s)) return 'Year 2';
+    if (/1(st)?|first|ist|one|ⅰ/i.test(s)) return 'Year 1';
+
+    if (/(^|[^a-z])(i|l|\|)([^a-z]|$)/i.test(str)) return 'Year 1';
+    if (/^(i|l|\|)[/\\\-_\.,]/i.test(s)) return 'Year 1';
+    if (/^(i|l)year/i.test(s)) return 'Year 1';
+    if (s === 'i' || s === 'l' || s === '|') return 'Year 1';
+
+    return null;
+};
+
 export default function SubmissionsClient({ formId }: { formId: string }) {
     const [submissions, setSubmissions] = useState<any[]>([]);
     const [form, setForm] = useState<any>(null);
@@ -18,6 +46,7 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
     const [confirmId, setConfirmId] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
+    const [fieldFilters, setFieldFilters] = useState<Record<string, string>>({});
 
     useEffect(() => {
         loadData();
@@ -55,6 +84,11 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
 
     const handleSearch = (val: string) => {
         setQuery(val);
+        setPage(1);
+        setSelectedSub(null);
+    };
+
+    const handleFilterChange = () => {
         setPage(1);
         setSelectedSub(null);
     };
@@ -98,18 +132,34 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
     );
     if (!form) return <div className="text-red-500">Form not found.</div>;
 
-    // Filter submissions across all response values + date string
+    // Filter submissions across all response values + year filters
     const filtered = (() => {
-        const q = query.trim().toLowerCase();
-        if (!q) return submissions;
-        return submissions.filter(sub => {
-            const dateStr = new Date(sub.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).toLowerCase();
-            if (dateStr.includes(q)) return true;
-            return Object.values(sub.responses || {}).some((v: any) => {
-                const str = Array.isArray(v) ? v.join(', ') : String(v ?? '');
-                return str.toLowerCase().includes(q);
-            });
+        let result = submissions;
+
+        Object.entries(fieldFilters).forEach(([fieldId, selectedVal]) => {
+            if (selectedVal) {
+                result = result.filter(sub => {
+                    const responseVal = sub.responses?.[fieldId];
+                    if (Array.isArray(responseVal)) {
+                        return responseVal.some(raw => normalizeYear(raw) === selectedVal);
+                    }
+                    return normalizeYear(responseVal) === selectedVal;
+                });
+            }
         });
+
+        const q = query.trim().toLowerCase();
+        if (q) {
+            result = result.filter(sub => {
+                const dateStr = new Date(sub.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).toLowerCase();
+                if (dateStr.includes(q)) return true;
+                return Object.values(sub.responses || {}).some((v: any) => {
+                    const str = Array.isArray(v) ? v.join(', ') : String(v ?? '');
+                    return str.toLowerCase().includes(q);
+                });
+            });
+        }
+        return result;
     })();
 
     const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
@@ -142,26 +192,63 @@ export default function SubmissionsClient({ formId }: { formId: string }) {
                 </button>
             </div>
 
-            {/* Search bar */}
+            {/* Search bar and Filters */}
             {submissions.length > 0 && (
-                <div className="relative">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    <input
-                        type="text"
-                        value={query}
-                        onChange={e => handleSearch(e.target.value)}
-                        placeholder="Search by response value or date…"
-                        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow placeholder-gray-400"
-                    />
-                    {query && (
-                        <button
-                            onClick={() => handleSearch('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                            aria-label="Clear search"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-                    )}
+                <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                    {/* Search */}
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={e => handleSearch(e.target.value)}
+                            placeholder="Search by response value or date…"
+                            className="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all placeholder-gray-400"
+                        />
+                        {query && (
+                            <button
+                                onClick={() => handleSearch('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                aria-label="Clear search"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Year Filters */}
+                    <div className="flex flex-wrap gap-3">
+                        {form.fields.filter((f: any) => {
+                            const lbl = f.label.toLowerCase();
+                            return lbl.includes('year') || lbl.includes('sem');
+                        }).map((f: any) => {
+                            const distinctValues = Array.from(new Set(
+                                submissions
+                                    .flatMap(s => Array.isArray(s.responses?.[f.id]) ? s.responses[f.id] : [s.responses?.[f.id]])
+                                    .map(v => normalizeYear(v))
+                                    .filter((v): v is string => Boolean(v))
+                            )).sort();
+
+                            if (distinctValues.length === 0) return null;
+
+                            return (
+                                <select
+                                    key={f.id}
+                                    value={fieldFilters[f.id] || ''}
+                                    onChange={(e) => {
+                                        setFieldFilters(prev => ({ ...prev, [f.id]: e.target.value }));
+                                        handleFilterChange();
+                                    }}
+                                    className="px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 truncate max-w-[200px] shadow-sm cursor-pointer"
+                                >
+                                    <option value="">All {f.label}</option>
+                                    {distinctValues.map((val: any) => (
+                                        <option key={val} value={val}>{val}</option>
+                                    ))}
+                                </select>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
 

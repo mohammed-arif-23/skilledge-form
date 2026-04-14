@@ -31,10 +31,17 @@ export async function GET() {
                 },
                 {
                     id: crypto.randomUUID(),
-                    type: "text",
-                    label: "Year / Sec",
-                    placeholder: "e.g., III / A",
-                    required: true
+                    type: "dropdown",
+                    label: "Year",
+                    required: true,
+                    options: ["1st Year", "2nd Year", "3rd Year", "4th Year"]
+                },
+                {
+                    id: crypto.randomUUID(),
+                    type: "dropdown",
+                    label: "Section",
+                    required: true,
+                    options: ["A", "B", "C", "Nil"]
                 },
                 {
                     id: crypto.randomUUID(),
