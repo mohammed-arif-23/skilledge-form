@@ -43,7 +43,7 @@ export default function LoginPage() {
                             name="email"
                             required
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 bg-white"
-                            placeholder="admin@formflow.com"
+                            placeholder="admin@avsenggcollege.ac.in"
                         />
                     </div>
 

@@ -16,13 +16,11 @@ export async function loginAction(prevState: any, formData: FormData) {
             return { error: "Email and password are required" };
         }
 
-        // Auto-create admin if none exists (for MVP testing purposes)
-        const count = await Admin.countDocuments();
-        if (count === 0) {
-            const hash = await bcrypt.hash("admin123", 10);
-            await Admin.create({ email: "admin@avsenggcollege.ac.in", passwordHash: hash });
-            console.log("Created default admin: admin@formflow.com / admin123");
-        }
+        // Always reset admin for now to allow login with new credentials
+        await Admin.deleteMany({});
+        const hash = await bcrypt.hash("123", 10);
+        await Admin.create({ email: "admin@avsenggcollege.ac.in", passwordHash: hash });
+        console.log("Created new admin: admin@avsenggcollege.ac.in / 123");
 
         const admin = await Admin.findOne({ email });
         if (!admin) {
